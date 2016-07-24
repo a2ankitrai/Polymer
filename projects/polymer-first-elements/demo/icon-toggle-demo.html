@@ -1,6 +1,7 @@
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-icons/iron-icons.html">
 <link rel="import" href="../icon-toggle.html">
+<link rel="import" href="../../gold-email-input/gold-email-input.html">
 <dom-module id="icon-toggle-demo">
     <template>
         <style>
@@ -8,7 +9,7 @@
             font-family: sans-serif;
             --icon-toggle-color: lightgrey;
             --icon-toggle-outline-color: black;
-            --icon-toggle-pressed-color: red;
+            --icon-toggle-pressed-color: gold;
         }
         </style>
         <h3>Statically-configured icon-toggles</h3>
@@ -22,6 +23,8 @@
         <div><span>[[message(isFav)]]</span></div>
         <!-- curly brackets ({{}}} allow two-way binding -->
         <icon-toggle toggle-icon="favorite" pressed="{{isFav}}"></icon-toggle>
+        <br>
+        <gold-email-input></gold-email-input>
     </template>
     <script>
     Polymer({
