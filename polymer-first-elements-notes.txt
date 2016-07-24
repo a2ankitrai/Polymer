@@ -1,0 +1,161 @@
+HTML imports and dependency management
+======================================
+Summary:
+When importing Polymer elements via HTML imports, always use the relative URL ../package-name/element-name.html (e.g. ../polymer/polymer.html or ../paper-elements/paper-button.html).
+
+Details:
+Suppose that you ran Polymer CLI to generate an element project. Your element is named my-el. You look inside my-el.html and see that Polymer has been imported like so:
+
+<link rel="import" href="../polymer/polymer.html">
+This path doesn't make sense. Relative to my-el.html, Polymer is actually located at bower_components/polymer/polymer.html. Whereas the HTML import above is referencing a location outside of your element project. What's going on?
+
+Bower installs dependencies in a flat dependency tree, like so:
+bower_components/
+  polymer/
+    polymer.html
+  my-el/
+    my-el.html
+  other-el/
+    other-el.html
+This works well on the application-level. All elements are siblings, so they can all reliably import each other using relative paths like ../polymer/polymer.html. This is why Polymer CLI uses relative paths when initializing your element project.
+
+However, one problem with this approach, as stated earlier, is that this structure does not actually match the layout in your element project. Your element project is actually laid out like so:
+
+bower_components/
+  polymer/
+    polymer.html
+my-el.html
+
+Polymer CLI handles this by remapping paths. When you run polymer serve, all elements in bower_components are remapped to appear to be in sibling directories relative to my-el. The current element is served from the made-up path of /components/bower name, where bower name is the name field from your element project's bower.json file.
+
+===============================================================================================================================================
+
+icon-toggle.html
+----------------
+This file contains the skeleton of a custom element. Unlike most HTML files, this file won't display anything if you load it in a browser—it just defines a new element. The demo imports icon-toggle.html so it can use the <icon-toggle> element.
+
+Starting code—HTML imports
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+
+The link rel="import" element is an HTML import, a new way of including resources in an HTML file.
+
+===============================================================================================================================================
+
+Starting code—local DOM template
+--------------------------------
+
+<dom-module id="icon-toggle">
+  <template>
+    <style>
+      /* local styles go here */
+      :host {
+        display: inline-block;
+      }
+    </style>
+    <!-- local DOM goes here -->
+    <span>Not much here yet.</span>
+  </template>
+  
+Key information:
+	-
+	The <dom-module> tag wraps an element's local DOM definition. In this case, the id attribute shows that this module includes the local DOM for an element called icon-toggle.
+	-
+	The <template> actually defines the element's local DOM structure and styling. This is where you'll add markup for your custom element.
+	-
+	The <style> element inside the <template> lets you define styles that are scoped to the local DOM, so they don't affect the rest of the document.
+	-
+	The :host pseudo-class matches the custom element you're defining (in this case, the <icon-toggle>). This is the element that contains or hosts the local DOM tree.
+	
+Local DOM lets you add a scoped DOM tree inside an element, with local styles and markup that are decoupled from the rest of the web page. Local DOM is based on the proposed Shadow DOM specification, and works with native shadow DOM where available.	
+https://www.polymer-project.org/1.0/docs/devguide/local-dom
+===============================================================================================================================================
+
+Starting code—element registration
+-----------------------------------
+  <script>
+    Polymer({
+      /* this is the element's prototype */
+      is: 'icon-toggle'
+    });
+  </script>
+</dom-module>
+
+Key information:
+
+The Polymer call registers the element so it's recognized by the browser.
+The argument to the Polymer call is the new element's prototype. You'll do more with this in a later step.
+The is property on the prototype is the new element's name. It has to match the id on the <dom-module> that contains the element's template.
+
+data binding and properties
+---------------------------
+
+icon-toggle.html
+<!-- local DOM goes here -->
+<iron-icon icon="[[toggleIcon]]">
+</iron-icon>
+
+Key information:
+
+toggleIcon is a property you'll define on the toggle button element. It doesn't have a default value yet.
+The icon="[[toggleIcon]]"assignment is a data binding. It links your element's toggleIcon property with the <iron-icon>'s icon property.
+
+properties object
+-----------------
+icon-toggle.html
+  Polymer({
+    /* this is the element's prototype */
+    is: 'icon-toggle',
+    properties: {
+      toggleIcon: String,
+      pressed: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        reflectToAttribute: true
+      }
+    }
+  });
+  
+Key information:
+
+For this more complicated property, you supply a configuration object with several fields.
+The value specifies the property's default value.
+The notify property tells Polymer to dispatch property change events when the property value changes. This lets the change be observed by other nodes.
+The reflectToAttribute property tells Polymer to update the corresponding attribute when the property changes. This lets you style the element using an attribute selector, like icon-toggle[pressed].
+
+notify and reflectToAttribute. The notify and reflectToAttribute properties may sound similar: they both make the element's state visible to the outside world. reflectToAttribute makes the state visible in the DOM tree, so that it's visible to CSS and the querySelector methods. notify makes state changes observable outside the element, either using JavaScript event handlers or Polymer two-way data binding.
+
+======================================================================================================================================================
+
+React to input
+---------------
+ To toggle the button, add an event listener. To add event listeners on the host element (in this case, icon-toggle), add a listeners object to the element prototype:
+ 
+ icon-toggle.html
+  Polymer({
+    /* this is the element's prototype */
+    is: 'icon-toggle',
+    properties: {
+      toggleIcon: String,
+      pressed: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        reflectToAttribute: true
+      }
+    },
+    listeners: {
+      'tap': 'toggle'
+    },
+    toggle: function() {
+      this.pressed = !this.pressed;
+    },
+  });
+  
+Key information:
+
+The listeners object provides a simple way to set up event handlers. It maps event names to handler names.
+
+The tap event is generated by Polymer's gesture system when the user clicks or taps on a target with a mouse or finger. (The listeners object works with built-in events like keydown and keyup, too.)
+
