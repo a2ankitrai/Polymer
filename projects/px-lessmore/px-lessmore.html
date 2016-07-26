@@ -1,0 +1,103 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<!--
+`px-lessmore`
+
+
+@demo demo/index.html 
+-->
+<dom-module id="px-lessmore">
+    <template>
+        <style>
+        :host {
+            display: block;
+        }
+        </style>
+        <!-- <h2>Hello [[prop1]]</h2> -->
+        <!--  [[content]] <br> -->
+        [[actualContent]]
+        <iron-icon icon="icons:more-horiz"></iron-icon>
+        [[propCanBeFunc()]]
+    </template>
+    <script>
+    Polymer({
+
+        is: 'px-lessmore',
+
+        properties: {
+            content: String,
+            prop1: {
+                type: String,
+                value: 'px-lessmore',
+            },
+            actualContent: {
+                type: String,
+                computed: 'getLimitedContent(content)',
+                observer: '_actualContentChanged'
+            },
+            propCanBeFunc: function() {
+                return "Property can be function as well";
+            }
+
+        },
+
+        getLimitedContent: function(content) {
+            var result;
+            if (content.length > 5) {
+                result = content.substring(0, 5);
+            } else {
+                result = content;
+            }
+            return result;
+        },
+
+        listeners: {
+            /*'tap': 'regularTap'*/
+            'tap': 'showFullContent',
+            'click': 'handleClick',
+        },
+
+        handleClick: function(e) {
+            console.info(e.target.id + ' was clicked.');
+        },
+
+        regularTap: function(e) {
+            console.log("Thank you for tapping");
+        },
+
+        showFullContent: function(content) {
+            console.log(content);
+        },
+
+        _actualContentChanged: function() {
+            console.log("actual content chagned");
+        },
+
+        created: function() {
+            console.log(this.localName + '#' + this.id + ' was created');
+        },
+
+        ready: function() {
+            console.log(this.localName + '#' + this.id + ' has local DOM initialized');
+            //   this.$.textContent = 'Hello!';
+            console.log(this);
+            //   this.textContent = 'Hello World, I am a Custom Element!'; 
+            // above works to change inner content. 
+        },
+
+        attached: function() {
+            console.log(this.localName + '#' + this.id + ' was attached');
+        },
+
+        detached: function() {
+            console.log(this.localName + '#' + this.id + ' was detached');
+        },
+
+        attributeChanged: function(name, type) {
+            console.log(this.localName + '#' + this.id + ' attribute ' + name +
+                ' was changed to ' + this.getAttribute(name));
+        }
+
+    });
+    </script>
+</dom-module>
